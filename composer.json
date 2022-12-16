@@ -1,0 +1,19 @@
+{
+    "name": "ale13/barberia",
+    "description": "Proyecto final MVC, Sass, Gulp, Php, ,Mysql, Js",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "MVC\\" : "./",
+            "Controllers\\" : "./controllers",
+            "Model\\" : "./models"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jonathan",
+            "email": "jonvasquez_0203@hotmail.com"
+        }
+    ],
+    "require": {}
+}
