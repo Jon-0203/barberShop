@@ -14,19 +14,6 @@ class Usuario extends ActiveRecord{
     public $email;
     public $password;
     public $telefono;
-    public $id;
-class Usuario extends ActiveRecord{
-    //Base de datos
-
-    protected static $tabla = 'usuarios';
-    protected static $columnasDB = ['id','nombre','apellido','email','password','telefono','admin','confirmado','token'];
-   
-    public $id;
-    public $nombre;
-    public $apellido;
-    public $email;
-    public $password;
-    public $telefono;
     public $admin;
     public $confirmado;
     public $token;
@@ -43,7 +30,5 @@ class Usuario extends ActiveRecord{
         $this->confirmado =$args=['confirmado'] ?? null;
         $this->token =$args=['token'] ?? '';
     }
-
-    
 
 }
