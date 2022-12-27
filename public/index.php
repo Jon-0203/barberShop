@@ -6,6 +6,7 @@ use Controllers\LogController;
 use MVC\Router;
 
 $router = new Router();
+//Aqui se colocan todas las rutas
 
 //Iniciar sesión
 $router->get('/', [LogController::class, 'login']);
