@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Classes\Email;
 use Model\Usuario;
 use MVC\Router;
 
@@ -30,7 +31,29 @@ class LogController{
             $usuario->sincronizar($_POST);
             $alertas = $usuario->validarNuevaCuenta();
             
-            
+            //debuguear($alertas);
+
+            //Revisar que alertas esta vacio
+            if(empty($alertas)){
+                //echo "Validación correcta";
+                //verificar que el usuario no esye registrado
+                $resultado = $usuario->existeUser();
+
+                if($resultado -> num_rows){
+                    $alertas = Usuario::getAlertas();
+                } else {
+                    //Hashear password
+                    $usuario -> hashPassword();
+
+                    $usuario -> crearToken();
+
+                    $email = new Email($usuario->nombre, $usuario->email, $usuario->token);
+
+                    $email->enviarConfirmacion();
+
+                    debuguear($usuario);
+                }
+            }
         }
 
         $router->render('auth/crear-cuenta', [

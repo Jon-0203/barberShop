@@ -2,6 +2,8 @@
 
 namespace Model;
 
+use LDAP\Result;
+
 class Usuario extends ActiveRecord{
 
     //Base de datos
@@ -34,12 +36,42 @@ class Usuario extends ActiveRecord{
 
     public function validarNuevaCuenta(){
         if(!$this->nombre) {
-            self::$alertas['error'][] = 'Es obligatorio el Nombre';
+            self::$alertas['error'][] = 'El Nombre es obligatorio';
         }
         if(!$this->apellido) {
-            self::$alertas['error'][] = 'Es obligatorio el Apellido';
+            self::$alertas['error'][] = 'El Apellido ss obligatorio ';
+        }
+        if(!$this->email) {
+            self::$alertas['error'][] = 'El Email es obligatorio';
+        }
+        if(!$this->password) {
+            self::$alertas['error'][] = 'El password es obligatorio';
+        }
+        if(strlen($this->password) < 6) {
+            self::$alertas['error'][] = 'El password debe tener al menos 6 caracteres';
         }
 
         return self::$alertas;
+    }
+
+    //Revisa si existe el usuario
+    public function existeUser() {
+        
+        $query = " SELECT * FROM " . self::$tabla . " WHERE email = '" . $this->email . "' LIMIT 1";
+        
+        $resultado= self::$db->query($query);
+
+        if($resultado -> num_rows){
+            self::$alertas['error'][] = 'El usuario ya esta registrado';
+        }
+         return $resultado;
+    }
+
+    public function hashPassword(){
+        $this ->password = password_hash($this->password, PASSWORD_BCRYPT);
+    }
+
+    public function crearToken() {
+        $this -> token = uniqid();
     }
 }
