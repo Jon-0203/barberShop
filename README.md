@@ -9,3 +9,10 @@ Linea de codigo para reconstruir modulos de nodeJS
 ``````
 npm install
 ``````
+
+Linea de codigo para construir el build
+
+``````
+npm run build
+
+``````
