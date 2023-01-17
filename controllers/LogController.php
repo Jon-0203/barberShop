@@ -36,7 +36,6 @@ class LogController
 
                         if ($usuario->admin === "1") {
                             $_SESSION['admin'] = $usuario->admin ?? null;
-
                             header('Location: /admin');
                         } else {
                             header('Location: /cita');
@@ -56,7 +55,9 @@ class LogController
 
     public static function logout()
     {
-        echo "Desde Logout";
+        session_start();
+        $_SESSION = [];
+        header('Location: /');
     }
 
     public static function olvide(Router $router)

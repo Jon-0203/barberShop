@@ -3,9 +3,10 @@ const pasoInicial = 1;
 const pasoFinal = 3;
 
 const cita = {
+  id: "",
   nombre: "",
-  fecha: "",
   hora: "",
+  fecha: "",
   servicios: [],
 };
 
@@ -21,6 +22,8 @@ function iniciarApp() {
   pagAnterior();
 
   consultaApi(); //consulta api en el backend
+
+  idCliente();
   mostrarNombre(); //Añade el nombre del cliente al objeto cita
   seleccionarFecha(); //Añade la fecha de la cita al objeto
   seleccionarHora(); //Añade lahora de la cita al objeto
@@ -162,6 +165,10 @@ function seleccionarServicio(servicio) {
   console.log(cita);
 }
 
+function idCliente() {
+  cita.id = document.querySelector("#id").value;
+}
+
 function mostrarNombre() {
   cita.nombre = mostrarNombre = document.querySelector("#nombre").value;
 }
@@ -205,7 +212,7 @@ function mostrarAlerta(mensaje, tipo, elemento, desaparece = true) {
   const alertaUnica = document.querySelector(".alerta");
   if (alertaUnica) {
     alertaUnica.remove();
-  };
+  }
   //Scripting para crear la alerta
   const alerta = document.createElement("DIV");
   alerta.textContent = mensaje;
@@ -227,57 +234,136 @@ function mostrarResumen() {
   const resumen = document.querySelector(".resumen-cita");
 
   //Limpiar contenido resumen
-    while(resumen.firstChild) {
-        resumen.removeChild(resumen.firstChild); 
-    }
+  while (resumen.firstChild) {
+    resumen.removeChild(resumen.firstChild);
+  }
   //Object.values accedemos al valor
   if (Object.values(cita).includes("") || cita.servicios.length === 0) {
-        mostrarAlerta("Faltan datos de servicios, Fecha u hora", "error", ".resumen-cita", false );
-        return;//detiene la ejecucion el else    
-    } 
-    
-    //Formatear el div de resumen
-    const{nombre, fecha, hora, servicios} = cita;
+    mostrarAlerta(
+      "Faltan datos de servicios, Fecha u hora",
+      "error",
+      ".resumen-cita",
+      false
+    );
+    return; //detiene la ejecucion el else
+  }
 
-    //Cabecera para servicios en resumen
-    const cabeceraServicios = document.createElement('H3');
-    cabeceraServicios.textContent = 'Resumen de servicios'
-    resumen.appendChild(cabeceraServicios);
-    //Iterando y mostrando los servicios
-    servicios.forEach(servicio => {
-        //Aplico destructuring
-        const {id, precio, nombre} = servicio;
+  //Formatear el div de resumen
+  const { nombre, fecha, hora, servicios } = cita;
 
-        const contenedorServicio = document.createElement('DIV');
-        contenedorServicio.classList.add('contenedor-servicio');
+  //Cabecera para servicios en resumen
+  const cabeceraServicios = document.createElement("H3");
+  cabeceraServicios.textContent = "Resumen de servicios";
+  resumen.appendChild(cabeceraServicios);
+  //Iterando y mostrando los servicios
+  servicios.forEach((servicio) => {
+    //Aplico destructuring
+    const { id, precio, nombre } = servicio;
 
-        const textoServicio = document.createElement('P');
-        textoServicio.textContent = nombre;
+    const contenedorServicio = document.createElement("DIV");
+    contenedorServicio.classList.add("contenedor-servicio");
 
-        const precioServicio = document.createElement('P');
-        precioServicio.innerHTML = `<span>Precio: </span>{precio} euros`;
+    const textoServicio = document.createElement("P");
+    textoServicio.textContent = nombre;
 
-        contenedorServicio.appendChild(textoServicio);
-        contenedorServicio.appendChild(precioServicio);
+    const precioServicio = document.createElement("P");
+    precioServicio.innerHTML = `<span>Precio: </span>${precio} euros`;
 
-        resumen.appendChild(contenedorServicio);
+    contenedorServicio.appendChild(textoServicio);
+    contenedorServicio.appendChild(precioServicio);
+
+    resumen.appendChild(contenedorServicio);
+  });
+
+  //Cabecera para cita en resumen
+  const cabeceraCita = document.createElement("H3");
+  cabeceraCita.textContent = "Resumen de Cita ";
+  resumen.appendChild(cabeceraCita);
+
+  const nombreCliente = document.createElement("P");
+  nombreCliente.innerHTML = `<span>Nombre : </span>${nombre}`;
+
+  //Formatear la fecha en español;
+  const ObjFecha = new Date(fecha);
+  const mes = ObjFecha.getMonth();
+  const dia = ObjFecha.getDate();
+  const year = ObjFecha.getFullYear();
+
+  const fechaUTC = new Date(Date.UTC(year, mes, dia));
+
+  const opciones = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  const fechaFormateada = fechaUTC.toLocaleDateString("es-ES", opciones);
+  console.log(fechaFormateada);
+
+  const fechaCita = document.createElement("P");
+  fechaCita.innerHTML = `<span>Fecha : </span>${fecha}`;
+
+  const horaCita = document.createElement("P");
+  horaCita.innerHTML = `<span>Hora : </span>${hora} horas`;
+
+  //Boton reservar
+  const botReservar = document.createElement("BUTTON");
+  botReservar.classList.add("boton");
+  botReservar.textContent = "Reservar cita";
+  botReservar.onclick = reservarCita;
+
+  resumen.appendChild(nombreCliente);
+  resumen.appendChild(fechaCita);
+  resumen.appendChild(horaCita);
+  resumen.appendChild(botReservar);
+}
+//Metodo utilizando fecth form-data
+async function reservarCita() {
+  const { nombre, hora, fecha, servicios, id } = cita;
+
+  const idServicios = servicios.map((servicio) => servicio.id);
+
+  //console.log(idServicios);
+
+  const datos = new FormData();
+
+  datos.append('hora', hora);
+  datos.append('fecha', fecha);
+  datos.append('usuarioId', id);
+  datos.append('servicios', idServicios);
+  //console.log(...datos)... Speed operator hace copia de formdata y lo resetea
+
+  try {
+          //Peticion hacia la API
+    const url = 'http://localhost:3000/api/citas'
+    const respuesta = await fetch(url, {
+      method: 'POST',
+      body: datos,
+    });
+
+    const resultado = await respuesta.json();
+    console.log(resultado.resultado);
+
+    //Utilizando librerias SweetAlerta2
+    if(resultado.resultado) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Cita creada',
+        text: 'Cita creada correctamente',
+        button: 'OK',
+      }).then(() => {
+        setTimeout(() => {
+          //Recargamos la pagina y volvemos al inicio
+          window.location.reload();
+        }, 2000);
+      })
+    }  
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'A ocurrido un error!',
     })
+  }
 
-    //Cabecera para cita en resumen
-    const cabeceraCita = document.createElement('H3');
-    cabeceraCita.textContent = 'Resumen de Cita'
-    resumen.appendChild(cabeceraCita);
-
-    const nombreCliente = document.createElement('P');
-    nombreCliente.innerHTML = `<span>Nombre: </span>${nombre}`;
-
-    const fechaCita = document.createElement('P');
-    fechaCita.innerHTML = `<span>Nombre: </span>${fecha}`;
-
-    const horaCita = document.createElement('P');
-    horaCita.innerHTML = `<span>Nombre: </span>${hora} horas`;
-
-    resumen.appendChild(nombreCliente);
-    resumen.appendChild(fechaCita);
-    resumen.appendChild(horaCita);  
 }
