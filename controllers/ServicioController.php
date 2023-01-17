@@ -10,6 +10,8 @@ class ServicioController{
         if(!isset($_SESSION)) {
             session_start();
         };
+        //Metodo que autentifica que que si esta registrado muestre la pgina si no lleve al inicio
+        isAdmin();
 
         $servicios = Servicio::all();
 
@@ -24,6 +26,8 @@ class ServicioController{
         if(!isset($_SESSION)) {
         session_start();
         };
+
+        isAdmin();
 
         $servicio = new Servicio;
         $alertas = [];
@@ -50,6 +54,9 @@ class ServicioController{
         if(!isset($_SESSION)) {
             session_start();
         };
+
+        isAdmin();
+
         if(!is_numeric($_GET['id'])) return;
         $servicio = Servicio::find($_GET['id']);
         $alertas = [];
@@ -73,6 +80,11 @@ class ServicioController{
     }
 
     public static function eliminar(Router $router){
+        if(!isset($_SESSION)) {
+            session_start();
+        };
+        isAdmin();
+
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $id = $_POST['id'];
             $servicio = Servicio::find($id);
