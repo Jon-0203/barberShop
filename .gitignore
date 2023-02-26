@@ -1,9 +1,11 @@
 
 src/
-public/
-node_modules/
-package-lock.json/
+vendor/
+node_modules
+package-lock.json
 package-json
+.env
+gulfile.js/
 
 
 
